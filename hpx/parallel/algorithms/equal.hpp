@@ -15,7 +15,9 @@
 #include <hpx/parallel/algorithms/detail/dispatch.hpp>
 #include <hpx/parallel/algorithms/detail/predicates.hpp>
 #include <hpx/parallel/execution_policy.hpp>
+#include <hpx/parallel/traits/projected.hpp>
 #include <hpx/parallel/util/detail/algorithm_result.hpp>
+#include <hpx/parallel/util/compare_projected.hpp>
 #include <hpx/parallel/util/loop.hpp>
 #include <hpx/parallel/util/partitioner.hpp>
 #include <hpx/parallel/util/zip_iterator.hpp>
@@ -256,13 +258,13 @@ namespace hpx { namespace parallel { inline namespace v1
         typename Proj2 = util::projection_identity,
     HPX_CONCEPT_REQUIRES_(
         execution::is_execution_policy<ExPolicy>::value &&
-        hpx::traits::is_iterator<FwdIter>::value &&
-        traits::is_projected<Proj1, FwdIter>::value &&
+        hpx::traits::is_iterator<FwdIter1>::value &&
+        traits::is_projected<Proj1, FwdIter1>::value &&
         hpx::traits::is_iterator<FwdIter2>::value &&
         traits::is_projected<Proj2, FwdIter2>::value &&
         traits::is_indirect_callable<
             ExPolicy, Pred,
-            traits::projected<Proj1, FwdIter>,
+            traits::projected<Proj1, FwdIter1>,
             traits::projected<Proj2, FwdIter2>
         >::value
     )>
@@ -297,7 +299,7 @@ namespace hpx { namespace parallel { inline namespace v1
 
         return detail::equal_binary().call(
             std::forward<ExPolicy>(policy), is_seq(),
-            first1, last1, first2, last2, std::forward<Pred>(op)
+            first1, last1, first2, last2, std::forward<Pred>(op),
             std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
     }
 
@@ -319,7 +321,7 @@ namespace hpx { namespace parallel { inline namespace v1
                 InIter2 first2, F && f, Proj1 && proj1, Proj2 && proj2)
             {
                 return std::equal(first1, last1, first2,
-                    hpx::util::compare_projected<F, Proj1, Proj2>(
+                    util::compare_projected<F, Proj1, Proj2>(
                         std::forward<F>(f),
                         std::forward<Proj1>(proj1),
                         std::forward<Proj2>(proj2)
@@ -330,7 +332,7 @@ namespace hpx { namespace parallel { inline namespace v1
                 typename F, typename Proj1, typename Proj2>
             static typename util::detail::algorithm_result<ExPolicy, bool>::type
             parallel(ExPolicy && policy, FwdIter1 first1, FwdIter1 last1,
-                FwdIter2 first2, F && f)
+                FwdIter2 first2, F && f, Proj1 && proj1, Proj2 && proj2)
             {
                 if (first1 == last1)
                 {
@@ -477,13 +479,13 @@ namespace hpx { namespace parallel { inline namespace v1
         typename Proj2 = util::projection_identity,
     HPX_CONCEPT_REQUIRES_(
         execution::is_execution_policy<ExPolicy>::value &&
-        hpx::traits::is_iterator<FwdIter>::value &&
-        traits::is_projected<Proj1, FwdIter>::value &&
+        hpx::traits::is_iterator<FwdIter1>::value &&
+        traits::is_projected<Proj1, FwdIter1>::value &&
         hpx::traits::is_iterator<FwdIter2>::value &&
         traits::is_projected<Proj2, FwdIter2>::value &&
         traits::is_indirect_callable<
             ExPolicy, Pred,
-            traits::projected<Proj1, FwdIter>,
+            traits::projected<Proj1, FwdIter1>,
             traits::projected<Proj2, FwdIter2>
         >::value
     )>
